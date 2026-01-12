@@ -1441,7 +1441,7 @@ parameters:
 			path: src/Mapping/Driver/XmlDriver.php
 
 		-
-			message: '#^Parameter \#1 \$columnDef of method Doctrine\\ORM\\Mapping\\ClassMetadata\<T of object\>\:\:setDiscriminatorColumn\(\) expects array\{name\: string\|null, fieldName\?\: string\|null, type\?\: string\|null, length\?\: int\|null, columnDefinition\?\: string\|null, enumType\?\: class\-string\<BackedEnum\>\|null, options\?\: array\<string, mixed\>\|null\}\|Doctrine\\ORM\\Mapping\\DiscriminatorColumnMapping\|null, array\{name\: string\|null, type\: string, length\: int, columnDefinition\: string\|null, enumType\: string\|null, options\?\: array\<int\|string, array\<int\|string, mixed\>\|bool\|string\>\} given\.$#'
+			message: '#^Parameter \#1 \$columnDef of method Doctrine\\ORM\\Mapping\\ClassMetadata\<T of object\>\:\:setDiscriminatorColumn\(\) expects array\{name\: string\|null, fieldName\?\: string\|null, type\?\: string\|null, length\?\: int\|null, columnDefinition\?\: string\|null, enumType\?\: class\-string\<BackedEnum\>\|null, options\?\: array\<string, mixed\>\|null\}\|Doctrine\\ORM\\Mapping\\DiscriminatorColumnMapping\|null, array\{name\: string\|null, type\: string, length\: int, columnDefinition\: string\|null, enumType\: string\|null, options\?\: array\<int\|string, array\<int\|string, mixed\>\|bool\|object\|string\>\} given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Mapping/Driver/XmlDriver.php
@@ -1471,7 +1471,7 @@ parameters:
 			path: src/Mapping/Driver/XmlDriver.php
 
 		-
-			message: '#^Property Doctrine\\ORM\\Mapping\\ClassMetadata\<T of object\>\:\:\$table \(array\{name\: string, schema\?\: string, indexes\?\: array, uniqueConstraints\?\: array, options\?\: array\<string, mixed\>, quoted\?\: bool\}\) does not accept array\{name\: string, schema\?\: string, indexes\?\: array, uniqueConstraints\?\: array, options\: array\<int\|string, array\<int\|string, mixed\>\|bool\|string\>, quoted\?\: bool\}\.$#'
+			message: '#^Property Doctrine\\ORM\\Mapping\\ClassMetadata\<T of object\>\:\:\$table \(array\{name\: string, schema\?\: string, indexes\?\: array, uniqueConstraints\?\: array, options\?\: array\<string, mixed\>, quoted\?\: bool\}\) does not accept array\{name\: string, schema\?\: string, indexes\?\: array, uniqueConstraints\?\: array, options\: array\<int\|string, array\<int\|string, mixed\>\|bool\|object\|string\>, quoted\?\: bool\}\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: src/Mapping/Driver/XmlDriver.php
@@ -2557,7 +2557,7 @@ parameters:
 			path: src/Query/Exec/MultiTableUpdateExecutor.php
 
 		-
-			message: '#^Parameter \#3 \$types of method Doctrine\\DBAL\\Connection\:\:executeStatement\(\) expects array\<int\<0, max\>\|string, Doctrine\\DBAL\\ArrayParameterType\|Doctrine\\DBAL\\ParameterType\|Doctrine\\DBAL\\Types\\Type\|string\>, list\<Doctrine\\DBAL\\ArrayParameterType\|Doctrine\\DBAL\\ParameterType\|Doctrine\\DBAL\\Types\\Type\|int\|string\> given\.$#'
+			message: '#^Parameter \#3 \$types of method Doctrine\\DBAL\\Connection\:\:executeStatement\(\) expects array\<int\<0, max\>\|string, Doctrine\\DBAL\\ArrayParameterType\|Doctrine\\DBAL\\ParameterType\|Doctrine\\DBAL\\Types\\Type\|string\>, list\<Doctrine\\DBAL\\ArrayParameterType\:\:ASCII\|Doctrine\\DBAL\\ArrayParameterType\:\:BINARY\|Doctrine\\DBAL\\ArrayParameterType\:\:INTEGER\|Doctrine\\DBAL\\ArrayParameterType\:\:STRING\|Doctrine\\DBAL\\ParameterType\:\:ASCII\|Doctrine\\DBAL\\ParameterType\:\:BINARY\|Doctrine\\DBAL\\ParameterType\:\:BOOLEAN\|Doctrine\\DBAL\\ParameterType\:\:INTEGER\|Doctrine\\DBAL\\ParameterType\:\:LARGE_OBJECT\|Doctrine\\DBAL\\ParameterType\:\:NULL\|Doctrine\\DBAL\\ParameterType\:\:STRING\|Doctrine\\DBAL\\Types\\Type\|int\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Query/Exec/MultiTableUpdateExecutor.php
@@ -2603,12 +2603,6 @@ parameters:
 			identifier: property.phpDocType
 			count: 1
 			path: src/Query/Expr/Select.php
-
-		-
-			message: '#^Property Doctrine\\ORM\\Query\\Filter\\SQLFilter\:\:\$parameters \(array\<string, array\{type\: string, value\: mixed, is_list\: bool\}\>\) does not accept non\-empty\-array\<string, array\{value\: mixed, type\: Doctrine\\DBAL\\ArrayParameterType\|Doctrine\\DBAL\\ParameterType\|int\|string, is_list\: bool\}\>\.$#'
-			identifier: assign.propertyType
-			count: 2
-			path: src/Query/Filter/SQLFilter.php
 
 		-
 			message: '#^Method Doctrine\\ORM\\Query\\ParameterTypeInferer\:\:inferType\(\) never returns int so it can be removed from the return type\.$#'

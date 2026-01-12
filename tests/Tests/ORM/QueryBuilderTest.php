@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Collections\Order;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\Deprecations\PHPUnit\VerifyDeprecations;
 use Doctrine\ORM\Cache;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
@@ -23,11 +24,13 @@ use Doctrine\Tests\Models\CMS\CmsGroup;
 use Doctrine\Tests\Models\CMS\CmsUser;
 use Doctrine\Tests\OrmTestCase;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 use function array_filter;
-use function class_exists;
 
 /**
  * Test case for the QueryBuilder class used to build DQL query string in a
@@ -35,6 +38,8 @@ use function class_exists;
  */
 class QueryBuilderTest extends OrmTestCase
 {
+    use VerifyDeprecations;
+
     private EntityManagerMock $entityManager;
 
     protected function setUp(): void
@@ -66,6 +71,26 @@ class QueryBuilderTest extends OrmTestCase
             ->delete();
 
         $this->assertValidQueryBuilder($qb, 'DELETE Doctrine\Tests\Models\CMS\CmsUser u');
+    }
+
+    public function testDeleteWithLimitNotSupported(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Setting a limit is not supported for delete or update queries.');
+
+        $this->entityManager->createQueryBuilder()
+            ->delete(CmsUser::class, 'c')
+            ->setMaxResults(1);
+    }
+
+    public function testUpdateWithLimitNotSupported(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Setting a limit is not supported for delete or update queries.');
+
+        $this->entityManager->createQueryBuilder()
+            ->update(CmsUser::class, 'c')
+            ->setMaxResults(1);
     }
 
     public function testUpdateSetsType(): void
@@ -590,7 +615,7 @@ class QueryBuilderTest extends OrmTestCase
             ->from(CmsUser::class, 'u');
 
         $criteria = Criteria::create(true);
-        $criteria->orderBy(['field' => class_exists(Order::class) ? Order::Descending : Criteria::DESC]);
+        $criteria->orderBy(['field' => Order::Descending]);
 
         $qb->addCriteria($criteria);
 
@@ -607,7 +632,7 @@ class QueryBuilderTest extends OrmTestCase
             ->join('u.article', 'a');
 
         $criteria = Criteria::create(true);
-        $criteria->orderBy(['a.field' => class_exists(Order::class) ? Order::Descending : Criteria::DESC]);
+        $criteria->orderBy(['a.field' => Order::Descending]);
 
         $qb->addCriteria($criteria);
 
@@ -1031,8 +1056,10 @@ class QueryBuilderTest extends OrmTestCase
         self::assertEquals('u', $qb->getRootAlias());
     }
 
+    #[WithoutErrorHandler]
     public function testBCAddJoinWithoutRootAlias(): void
     {
+        $this->expectDeprecationWithIdentifier('https://github.com/doctrine/orm/pull/12051');
         $qb = $this->entityManager->createQueryBuilder()
             ->select('u')
             ->from(CmsUser::class, 'u')
@@ -1348,5 +1375,100 @@ class QueryBuilderTest extends OrmTestCase
         };
 
         $qb->test();
+    }
+
+    #[DataProvider('provideHint')]
+    public function testSingleHint(mixed $expected): void
+    {
+        $qb = $this->entityManager->createQueryBuilder()
+            ->delete(CmsUser::class, 'u')
+            ->select('u.id', 'u.username')
+            ->setHint('foo', $expected);
+
+        $this->assertValidQueryBuilder($qb, 'SELECT u.id, u.username FROM Doctrine\Tests\Models\CMS\CmsUser u');
+
+        $query = $qb->getQuery();
+        self::assertTrue($query->hasHint('foo'));
+        self::assertEquals($expected, $query->getHint('foo'));
+    }
+
+    public static function provideHint(): array
+    {
+        return [
+            ['bar'],
+            [new CmsUser()],
+            [['a','b','c']],
+            [1],
+            [true],
+        ];
+    }
+
+    public function testMultipleHints(): void
+    {
+        $object = new CmsUser();
+        $qb     = $this->entityManager->createQueryBuilder()
+            ->delete(CmsUser::class, 'u')
+            ->select('u.id', 'u.username')
+            ->setHint('string', 'bar')
+            ->setHint('object', $object)
+            ->setHint('array', ['a', 'b', 'c'])
+            ->setHint('int', 5)
+            ->setHint('bool', true);
+
+        $this->assertValidQueryBuilder($qb, 'SELECT u.id, u.username FROM Doctrine\Tests\Models\CMS\CmsUser u');
+
+        $query = $qb->getQuery();
+        self::assertTrue($query->hasHint('string'));
+        self::assertTrue($query->hasHint('object'));
+        self::assertTrue($query->hasHint('array'));
+        self::assertTrue($query->hasHint('int'));
+        self::assertTrue($query->hasHint('bool'));
+
+        self::assertEquals('bar', $query->getHint('string'));
+        self::assertInstanceOf(CmsUser::class, $query->getHint('object'));
+        self::assertEquals(['a', 'b', 'c'], $query->getHint('array'));
+        self::assertEquals(5, $query->getHint('int'));
+        self::assertTrue($query->getHint('bool'));
+    }
+
+    public function testHasHint(): void
+    {
+        $qb = $this->entityManager->createQueryBuilder()
+            ->delete(CmsUser::class, 'u')
+            ->select('u.id', 'u.username')
+            ->setHint('foo', 'bar');
+
+        $this->assertValidQueryBuilder($qb, 'SELECT u.id, u.username FROM Doctrine\Tests\Models\CMS\CmsUser u');
+
+        self::assertTrue($qb->hasHint('foo'));
+    }
+
+    public function testGetHint(): void
+    {
+        $qb = $this->entityManager->createQueryBuilder()
+            ->delete(CmsUser::class, 'u')
+            ->select('u.id', 'u.username')
+            ->setHint('foo', 'bar');
+
+        $this->assertValidQueryBuilder($qb, 'SELECT u.id, u.username FROM Doctrine\Tests\Models\CMS\CmsUser u');
+
+        self::assertEquals('bar', $qb->getHint('foo'));
+    }
+
+    public function testGetHints(): void
+    {
+        $object = new CmsUser();
+        $qb     = $this->entityManager->createQueryBuilder()
+            ->delete(CmsUser::class, 'u')
+            ->select('u.id', 'u.username')
+            ->setHint('string', 'bar')
+            ->setHint('object', $object)
+            ->setHint('array', ['a', 'b', 'c'])
+            ->setHint('int', 5)
+            ->setHint('bool', true);
+
+        $this->assertValidQueryBuilder($qb, 'SELECT u.id, u.username FROM Doctrine\Tests\Models\CMS\CmsUser u');
+
+        self::assertCount(5, $qb->getHints('foo'));
     }
 }

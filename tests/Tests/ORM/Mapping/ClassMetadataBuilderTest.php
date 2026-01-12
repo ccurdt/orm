@@ -247,7 +247,7 @@ class ClassMetadataBuilderTest extends OrmTestCase
             FieldMapping::fromMappingArray([
                 'columnDefinition' => 'foobar',
                 'columnName' => 'username',
-                'default' => 1,
+                'options' => ['default' => 1],
                 'fieldName' => 'name',
                 'length' => 124,
                 'type' => 'integer',
@@ -539,7 +539,6 @@ class ClassMetadataBuilderTest extends OrmTestCase
                             [
                                 'name' => 'group_id',
                                 'referencedColumnName' => 'id',
-                                'nullable' => false,
                                 'unique' => false,
                                 'onDelete' => 'CASCADE',
                                 'columnDefinition' => null,
@@ -551,7 +550,6 @@ class ClassMetadataBuilderTest extends OrmTestCase
                             [
                                 'name' => 'user_id',
                                 'referencedColumnName' => 'id',
-                                'nullable' => false,
                                 'unique' => false,
                                 'onDelete' => null,
                                 'columnDefinition' => null,
@@ -742,7 +740,6 @@ class ClassMetadataBuilderTest extends OrmTestCase
                             0 => [
                                 'name' => 'group_id',
                                 'referencedColumnName' => 'id',
-                                'nullable' => false,
                                 'unique' => false,
                                 'onDelete' => 'CASCADE',
                                 'columnDefinition' => null,
